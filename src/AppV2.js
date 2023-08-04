@@ -4,10 +4,9 @@ import ItemDeLista from './components/ItemDeLista';
 import CustomButton from './components/CustomButton';
 import Header from './components/Header';
 
-function App() {
+function AppV2() {
   const [listaDeTareas, setListaDeTareas] = useState([])
   const [valorInput, setValorInput] = useState("")
-  const [estadoTarea, setEstadoTarea] = useState("All") //que pueda ser All, Active, Completed
   
   const checkBoxClick = (index) => {
     console.log('checkbox click')
@@ -20,17 +19,43 @@ function App() {
 
   const buttonComplete = () => {
     console.log('button-completed')
-    setEstadoTarea("Completed")
+    const copiaListaDeTareas = [...listaDeTareas]
+
+    copiaListaDeTareas.map((item) => {
+        if(!item.completada) {
+            item.show = false
+        } else {
+            item.show = true
+        }
+    })
+
+    setListaDeTareas(copiaListaDeTareas)
   }
 
   const buttonAll = () => {
     console.log('button-all')
-    setEstadoTarea("All")
+    const copiaListaDeTareas = [...listaDeTareas]
+
+    copiaListaDeTareas.map((item) => {
+        item.show = true
+    })
+
+    setListaDeTareas(copiaListaDeTareas)
   }
 
   const buttonActive = () => {
     console.log('button active')
-    setEstadoTarea("Active")
+    const copiaListaDeTareas = [...listaDeTareas]
+
+    copiaListaDeTareas.map((item) => {
+        if(item.completada) {
+            item.show = false
+        } else {
+            item.show = true
+        }
+    })
+
+    setListaDeTareas(copiaListaDeTareas)
   }
 
   const crearTarea = (event) => {
@@ -38,7 +63,8 @@ function App() {
     let tarea = {
               textoDeTarea: valorInput,
               id:  listaDeTareas.length + 1,
-              completada: false
+              completada: false,
+              show: true
           }
     setListaDeTareas([...listaDeTareas, tarea])
     setValorInput("")
@@ -60,17 +86,9 @@ function App() {
         <div className="lista-de-tareas">
           <ul>  
             {listaDeTareas.map((tarea, index) => {
-              if (estadoTarea === "Active" && !tarea.completada) {
-                return <ItemDeLista key={tarea.id} tarea={tarea} checkBoxClick={() => checkBoxClick(index)} />
-              }
-
-              if (estadoTarea === "Completed" && tarea.completada) {
-                return <ItemDeLista key={tarea.id} tarea={tarea} checkBoxClick={() => checkBoxClick(index)} />
-              }
-
-              if (estadoTarea === "All") {
-                return <ItemDeLista key={tarea.id} tarea={tarea} checkBoxClick={() => checkBoxClick(index)} />
-              }
+                if(tarea.show) {
+                    return <ItemDeLista key={tarea.id} tarea={tarea} checkBoxClick={() => checkBoxClick(index)} />
+                }
             })}
           </ul>
           <div className="buttons">
@@ -84,4 +102,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppV2;
