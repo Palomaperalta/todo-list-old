@@ -1,74 +1,55 @@
-import './App.css';
-import React, {useState} from 'react'
-import ItemDeLista from './components/ItemDeLista';
-import CustomButton from './components/CustomButton';
-import Header from './components/Header';
+import "./App.css";
+import React, { useEffect, useState } from "react";
+import ItemDeLista from "./components/ItemDeLista";
+import CustomButton from "./components/CustomButton";
+import Header from "./components/Header";
+import { getData } from "./api/getData";
+import { createTodo } from "./api/createTodo";
+import { getHechos } from "./api/getHechos";
+import { getNoHechos } from "./api/getNohechos";
+import { updateTodo } from "./api/updateTodo";
 
 function AppV2() {
-  const [listaDeTareas, setListaDeTareas] = useState([])
-  const [valorInput, setValorInput] = useState("")
-  
-  const checkBoxClick = (index) => {
-    console.log('checkbox click')
-    const tareasModificadas = [...listaDeTareas]
+  const [listaDeTareas, setListaDeTareas] = useState([]);
+  const [valorInput, setValorInput] = useState("");
 
-    const tareaACambiar = tareasModificadas[index]
-    tareaACambiar.completada = !tareaACambiar.completada
-    setListaDeTareas(tareasModificadas)
-  }
+  useEffect(() => {
+    async function aux() {
+      const result = await getData();
+      console.log(result);
+      setListaDeTareas(result);
+    }
+    aux();
+  }, []);
 
-  const buttonComplete = () => {
-    console.log('button-completed')
-    const copiaListaDeTareas = [...listaDeTareas]
+  const checkBoxClick = async (id, hecho) => {
+    await updateTodo(hecho, id);
+    const result = await getData();
+    setListaDeTareas(result);
+  };
 
-    copiaListaDeTareas.map((item) => {
-        if(!item.completada) {
-            item.show = false
-        } else {
-            item.show = true
-        }
-    })
+  const buttonComplete = async () => {
+    const result = await getHechos();
+    setListaDeTareas(result);
+  };
 
-    setListaDeTareas(copiaListaDeTareas)
-  }
+  const buttonAll = async () => {
+    const result = await getData();
+    setListaDeTareas(result);
+  };
 
-  const buttonAll = () => {
-    console.log('button-all')
-    const copiaListaDeTareas = [...listaDeTareas]
+  const buttonActive = async () => {
+    const result = await getNoHechos();
+    setListaDeTareas(result);
+  };
 
-    copiaListaDeTareas.map((item) => {
-        item.show = true
-    })
-
-    setListaDeTareas(copiaListaDeTareas)
-  }
-
-  const buttonActive = () => {
-    console.log('button active')
-    const copiaListaDeTareas = [...listaDeTareas]
-
-    copiaListaDeTareas.map((item) => {
-        if(item.completada) {
-            item.show = false
-        } else {
-            item.show = true
-        }
-    })
-
-    setListaDeTareas(copiaListaDeTareas)
-  }
-
-  const crearTarea = (event) => {
-    event.preventDefault()
-    let tarea = {
-              textoDeTarea: valorInput,
-              id:  listaDeTareas.length + 1,
-              completada: false,
-              show: true
-          }
-    setListaDeTareas([...listaDeTareas, tarea])
-    setValorInput("")
-  }
+  const crearTarea = async (event) => {
+    event.preventDefault();
+    await createTodo(valorInput);
+    setValorInput("");
+    const result = await getData();
+    setListaDeTareas(result);
+  };
 
   return (
     <div className="content">
@@ -77,25 +58,48 @@ function AppV2() {
       </div>
       <div>
         <form onSubmit={crearTarea}>
-          <input type="text" placeholder="Create a new todo..." className="nueva-tarea" 
-          value={valorInput} 
-          onChange={(event) => {
-            setValorInput(event.target.value)
-          }} />
+          <input
+            type="text"
+            placeholder="Create a new todo..."
+            className="nueva-tarea"
+            value={valorInput}
+            onChange={(event) => {
+              setValorInput(event.target.value);
+            }}
+          />
         </form>
         <div className="lista-de-tareas">
-          <ul>  
+          <ul>
             {listaDeTareas.map((tarea, index) => {
-                if(tarea.show) {
-                    return <ItemDeLista key={tarea.id} tarea={tarea} checkBoxClick={() => checkBoxClick(index)} />
-                }
+              return (
+                <ItemDeLista
+                  key={tarea.id_todolist}
+                  tarea={tarea}
+                  checkBoxClick={() =>
+                    checkBoxClick(tarea.id_todolist, !tarea.hecho)
+                  }
+                  setListaDeTareas={setListaDeTareas}
+                />
+              );
             })}
           </ul>
           <div className="buttons">
-            <CustomButton funcionParaOnClick={buttonAll} buttonText="All" estiloParaElBoton="all" />
-            <CustomButton funcionParaOnClick={buttonActive} buttonText="Active" estiloParaElBoton="active" />
-            <CustomButton funcionParaOnClick={buttonComplete} buttonText="Complete" estiloParaElBoton="complete" />
-          </div> 
+            <CustomButton
+              funcionParaOnClick={buttonAll}
+              buttonText="All"
+              estiloParaElBoton="all"
+            />
+            <CustomButton
+              funcionParaOnClick={buttonActive}
+              buttonText="Active"
+              estiloParaElBoton="active"
+            />
+            <CustomButton
+              funcionParaOnClick={buttonComplete}
+              buttonText="Complete"
+              estiloParaElBoton="complete"
+            />
+          </div>
         </div>
       </div>
     </div>
